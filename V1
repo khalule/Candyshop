@@ -1,1 +1,34 @@
+from flask import Flask, render_template, request, jsonify
 
+app = Flask(__name__)
+
+# Beispielhafte Süßigkeiten-Daten
+candies = [
+    {"id": 1, "name": "Schokolade", "price": 1.50},
+    {"id": 2, "name": "Gummibärchen", "price": 2.00},
+    {"id": 3, "name": "Lutscher", "price": 0.50},
+    {"id": 4, "name": "Lakritz", "price": 1.20}
+]
+
+cart = []
+
+@app.route('/')
+def index():
+    return render_template('index.html', candies=candies)
+
+@app.route('/add_to_cart', methods=['POST'])
+def add_to_cart():
+    data = request.json
+    candy_id = data.get("id")
+    candy = next((c for c in candies if c["id"] == candy_id), None)
+    if candy:
+        cart.append(candy)
+        return jsonify({"message": "Hinzugefügt!", "cart": cart})
+    return jsonify({"message": "Fehler: Nicht gefunden!"}), 404
+
+@app.route('/cart')
+def get_cart():
+    return jsonify(cart)
+
+if __name__ == '__main__':
+    app.run(debug=True)
